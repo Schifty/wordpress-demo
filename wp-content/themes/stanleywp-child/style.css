@@ -1,0 +1,11 @@
+/*
+ Theme Name:   Stanley Child
+ Description:  this is a childtheme from the stanleywp theme
+ Author:       Anthony Schifferns
+ Template:     stanleywp
+ Version:      0.1
+*/
+
+@import url("../stanleywp/style.css");
+
+form.form-horizontal{padding-top: 16px;}
