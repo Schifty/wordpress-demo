@@ -4,6 +4,8 @@
 
 function wpdemo_load_scripts()
 {
+	/////////////////////////////////////nivo slider///////////////////////////////////////
+	
 	//function to load the custom stylesheet which is differnet  from style.css
 	wp_enqueue_style( 'default', get_stylesheet_directory_uri().'/css/themes/default/default.css' );
 	
@@ -16,6 +18,27 @@ function wpdemo_load_scripts()
 	// starts the slider by loading the slider start code which calls a function in the nivo slider code
 	wp_enqueue_style( 'nivo-css', get_stylesheet_directory_uri() . '/css/nivo-slider.css' );
 	
+	
+	
+	/////////////////////////font awesome//////////////////////////////////////
+	
+	// starts the slider by loading the slider start code which calls a function in the nivo slider code
+	wp_enqueue_style( 'fnt-awesome', 'https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css' );
+
+	
+	
+	
+	////////////////////datepicker////////////////////////////////
+
+	// css fle hosted by google
+	wp_enqueue_style( 'jquery-ui', 'https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css' );
+
+	// js fle which is provided b wordpress
+	wp_enqueue_script( 'jquery-ui-datepicker' );
+	
+	
+	// my scrpt for using the datepicker
+	wp_enqueue_script( 'datepicker', get_stylesheet_directory_uri() . '/js/datepicker.js', array('jquery-ui-datepicker'), '1.0.0', true );
 }
 //first parameter is the  hook, second in the function
 add_action('wp_enqueue_scripts', 'wpdemo_load_scripts');
@@ -67,8 +90,8 @@ function insert_request_info()
 	$industry = wp_strip_all_tags($_POST['industry']);
 	$occupation = wp_strip_all_tags($_POST['occupation']);
     $experience = wp_strip_all_tags($_POST['experience']);
-    $workPerformed = wp_strip_all_tags($_POST['workperformed']);
-	$additionlInfo = wp_strip_all_tags($_POST['additionlinfo']);
+    $workperformed = wp_strip_all_tags($_POST['workperformed']);
+	$additionalinfo = wp_strip_all_tags($_POST['additionalinfo']);
 	$employer1 = wp_strip_all_tags($_POST['employer1']);
     $employer2 = wp_strip_all_tags($_POST['employer2']);
     $employer3 = wp_strip_all_tags($_POST['employer3']);
@@ -86,7 +109,7 @@ function insert_request_info()
 	
 	
 	//inserted into demowp_posts using wpdb object and its function
-	$wpdb->insert( 	demowp_posts, $request_post );
+	$wpdb->insert( 	'demowp_posts', $request_post );
 	
 	//postid variable gets the post id of the contact post just entered and saves it for the post met information
 	$post_id = $wpdb->insert_id;
@@ -100,9 +123,9 @@ function insert_request_info()
 	
 	
 	// this tie the meta info is inserted into the post meta table
-	$wpdb->insert( 	demowp_postmeta, $fname_meta );
+	$wpdb->insert( 	'demowp_postmeta', $fname_meta );
 	
-	// clumns and meta value for entering the lname
+		// clumns and meta value for entering the lname
 	$lname_meta = array(
 	  'post_id' => $post_id,
 	  'meta_key'   => 'lname',
@@ -111,7 +134,7 @@ function insert_request_info()
 	
 	
 	// this tie the meta info is inserted into the post meta table
-	$wpdb->insert( 	demowp_postmeta, $lname_meta );
+	$wpdb->insert( 	'demowp_postmeta', $lname_meta );
 	
 	// clumns and meta value for entering the email
 	$email_meta = array(
@@ -122,18 +145,9 @@ function insert_request_info()
 	
 	
 	// this tie the meta info is inserted into the post meta table
-	$wpdb->insert( 	demowp_postmeta, $email_meta );
-	
-	// clumns and meta value for entering the message
-	$member_meta = array(
-	  'post_id' => $post_id,
-	  'meta_key'   => 'member',
-	  'meta_value' => $member
-	);
+	$wpdb->insert( 	'demowp_postmeta', $email_meta );
 	
 	
-	// this tie the meta info is inserted into the post meta table
-	$wpdb->insert( 	demowp_postmeta, $message_meta );
 	
 	// clumns and meta value for entering the message
 	$phone_meta = array(
@@ -143,7 +157,17 @@ function insert_request_info()
 	);
 	
 	// this tie the meta info is inserted into the post meta table
-	$wpdb->insert( 	demowp_postmeta, $phone_meta );
+	$wpdb->insert( 	'demowp_postmeta', $phone_meta );
+	
+	// clumns and meta value for entering the message
+	$member_meta = array(
+	  'post_id' => $post_id,
+	  'meta_key'   => 'member',
+	  'meta_value' => $member
+	);
+	
+	// this tie the meta info is inserted into the post meta table
+	$wpdb->insert( 	'demowp_postmeta', $member_meta );
 	
 	// clumns and meta value for entering the fname
 	$industry_meta = array(
@@ -154,7 +178,7 @@ function insert_request_info()
 	
 	
 	// this tie the meta info is inserted into the post meta table
-	$wpdb->insert( 	demowp_postmeta, $industry_meta );
+	$wpdb->insert( 	'demowp_postmeta', $industry_meta );
 	
 	// clumns and meta value for entering the fname
 	$occupation_meta = array(
@@ -165,7 +189,7 @@ function insert_request_info()
 	
 	
 	// this tie the meta info is inserted into the post meta table
-	$wpdb->insert( 	demowp_postmeta, $occupation_meta );
+	$wpdb->insert( 	'demowp_postmeta', $occupation_meta );
 	
 	// clumns and meta value for entering the fname
 	$experience_meta = array(
@@ -174,9 +198,8 @@ function insert_request_info()
 	  'meta_value' => $experience
 	);
 	
-	
 	// this tie the meta info is inserted into the post meta table
-	$wpdb->insert( 	demowp_postmeta, $experience_meta );
+	$wpdb->insert( 	'demowp_postmeta', $experience_meta );
 	
 	// clumns and meta value for entering the fname
 	$workperformed_meta = array(
@@ -187,18 +210,18 @@ function insert_request_info()
 	
 	
 	// this tie the meta info is inserted into the post meta table
-	$wpdb->insert( 	demowp_postmeta, $fname_meta );
+	$wpdb->insert( 	'demowp_postmeta', $workperformed_meta );
 	
 	// clumns and meta value for entering the fname
-	$additionlinfo_meta = array(
+	$additionalinfo_meta = array(
 	  'post_id' => $post_id,
-	  'meta_key'   => 'additionlinfo',
-	  'meta_value' => $additionlinfo
+	  'meta_key'   => 'additionalinfo',
+	  'meta_value' => $additionalinfo
 	);
 	
 	
 	// this tie the meta info is inserted into the post meta table
-	$wpdb->insert( 	demowp_postmeta, $additionalinfo_meta );
+	$wpdb->insert( 	'demowp_postmeta', $additionalinfo_meta );
 	
 	// clumns and meta value for entering the fname
 	$employer1_meta = array(
@@ -209,8 +232,8 @@ function insert_request_info()
 	
 	
 	// this tie the meta info is inserted into the post meta table
-	$wpdb->insert( 	demowp_postmeta, $employer1_meta );
-	
+	$wpdb->insert( 	'demowp_postmeta', $employer1_meta );
+
 	// clumns and meta value for entering the fname
 	$employer2_meta = array(
 	  'post_id' => $post_id,
@@ -220,7 +243,7 @@ function insert_request_info()
 	
 	
 	// this tie the meta info is inserted into the post meta table
-	$wpdb->insert( 	demowp_postmeta, $employer2_meta );
+	$wpdb->insert( 	'demowp_postmeta', $employer2_meta );
 	
 	// clumns and meta value for entering the fname
 	$employer3_meta = array(
@@ -231,10 +254,7 @@ function insert_request_info()
 	
 	
 	// this tie the meta info is inserted into the post meta table
-	$wpdb->insert( 	demowp_postmeta, $employer3_meta );
-	
-	
-	
+	$wpdb->insert( 	'demowp_postmeta', $employer3_meta );
 
 }//close the add meta function
 
@@ -269,8 +289,8 @@ function show_request_form_error()
 		$industry = trim($_POST['industry']);
 		$occupation = trim($_POST['occupation']);
 		$experience  = trim($_POST['experience']);
-		$workPerformed = trim($_POST['workPerformed']);
-		$additionlInfo = trim($_POST['aditionlinfo']);
+		$workperformed = trim($_POST['workperformed']);
+		$additionalinfo = trim($_POST['aditionalinfo']);
 		$employer1 = trim($_POST['employer1']);
 		$employer2 = trim($_POST['employer2']);
 		$employer3 = trim($_POST['employer3']);
@@ -332,8 +352,9 @@ function show_request_form_error()
         if ($member!= ""){
 			// sanitize to remove illegal cde entered into the form or illegal characters
 			$member = filter_var($member, FILTER_SANTIZE_STRING);
+		
 			//after the first name has been sanitized, make sure it is not blank
-			if($industry == "") {
+			if($member == "") {
 				$error .= 'Please state yes if your a member<br/><br/>';
 			}
 			else {
@@ -370,7 +391,7 @@ function show_request_form_error()
 		// Check if name has been entered
         if ($workPerformed!= ""){
 			// sanitize to remove illegal cde entered into the form or illegal characters
-			$workPerformed = filter_var($workPerformed, FILTER_SANTIZE_STRING);
+			$workperformed = filter_var($workPerformed, FILTER_SANTIZE_STRING);
 			//after the first name has been sanitized, make sure it is not blank
 			if($workPerformed == "") {
 				$error .= 'Please enter the work performed<br/><br/>';
@@ -383,7 +404,7 @@ function show_request_form_error()
 		// Check if name has been entered
         if ($additionalInfo!= ""){
 			// sanitize to remove illegal cde entered into the form or illegal characters
-			$additionalInfo = filter_var($workPerformed, FILTER_SANTIZE_STRING);
+			$additionalinfo = filter_var($additionalInfo, FILTER_SANTIZE_STRING);
 			//after the first name has been sanitized, make sure it is not blank
 			if($additionalInfo == "") {
 				$error .= 'Please enter any additional info <br/><br/>';
@@ -526,21 +547,21 @@ function show_request_form($error="")
 	<div class="form-group">
         <label for="WorkPerformed" class="col-sm-2 control-label">Work Performed</label>
         <div class="col-sm-10">
-            <input type="text" class="form-control" id="workPerformed" name="workPerformed" placeholder="Data Entry" value="<?php echo htmlspecialchars($_POST['workPerformed']); ?>">
+            <input type="text" class="form-control" id="workperformed" name="workperformed" placeholder="Data Entry" value="<?php echo htmlspecialchars($_POST['workperformed']); ?>">
             
         </div>
     </div>
 	
 	<div class="form-group">
-        <label for="info" class="col-sm-2 control-label">Additionl Info</label>
+        <label for="info" class="col-sm-2 control-label">Additional Info</label>
         <div class="col-sm-10">
-            <input type="text" class="form-control" id="additionlInfo" name="additionlInfo" placeholder="My Portfolio is www.portfolio.exmple" value="<?php echo htmlspecialchars($_POST['additionlInfo']); ?>">
+            <input type="text" class="form-control" id="additionlinfo" name="additionalinfo" placeholder="My Portfolio is www.portfolio.exmple" value="<?php echo htmlspecialchars($_POST['additionalinfo']); ?>">
             
         </div>
     </div>
 	
 	<div class="form-group">
-        <label for="employer1" class="col-sm-2 control-label">employer1</label>
+        <label for="employer1" class="col-sm-2 control-label">Employer 1</label>
         <div class="col-sm-10">
             <input type="text" class="form-control" id="employer1" name="employer1" placeholder="InkBS, Vancouver, Canada" value="<?php echo htmlspecialchars($_POST['employer1']); ?>">
             
@@ -548,7 +569,7 @@ function show_request_form($error="")
     </div>
 	
 	<div class="form-group">
-        <label for="employer2" class="col-sm-2 control-label">employer2</label>
+        <label for="employer2" class="col-sm-2 control-label">Employer 2</label>
         <div class="col-sm-10">
             <input type="text" class="form-control" id="employer2" name="employer2" placeholder="FDP.com, Shenzhen, China" value="<?php echo htmlspecialchars($_POST['employer2']); ?>">
             
@@ -556,7 +577,7 @@ function show_request_form($error="")
     </div>
 	
 	<div class="form-group">
-        <label for="employer3" class="col-sm-2 control-label">employer3</label>
+        <label for="employer3" class="col-sm-2 control-label">Employer 3</label>
         <div class="col-sm-10">
             <input type="text" class="form-control" id="employer3" name="employer3" placeholder="DealExtreme, GuangDong, China" value="<?php echo htmlspecialchars($_POST['employer3']); ?>">
             
@@ -748,6 +769,7 @@ function show_contact_form($error="")
     <div class="form-group">
         <div class="col-sm-10 col-sm-offset-2">
             <input id="submit" name="Submit" type="submit" value="Send" class="btn btn-primary">
+			
         </div>
     </div>
  
@@ -966,7 +988,6 @@ function get_favicon()
 	
 	
 }//close the add meta function
-
 
 
 
