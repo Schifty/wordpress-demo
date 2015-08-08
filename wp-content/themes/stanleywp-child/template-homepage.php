@@ -6,9 +6,26 @@
  */
 ?>
 
-<?php get_header(); 
+<?php get_header(); ?>
 
-		echo the_field('home_meta_descritpion');?>
+
+
+	<div id="wrapper">
+
+        <div class="slider-wrapper theme-default">
+            <div id="slider" class="nivoSlider">
+				<img src="<?php echo get_stylesheet_directory_uri().'/images/toystory.jpg';?>" data-thumb="<?php echo get_stylesheet_directory_uri().'images/toystory.jpg';?>" alt="" />
+                <a href="http://dev7studios.com"><img src="<?php echo get_stylesheet_directory_uri().'/images/up.jpg';?>" data-thumb="<?php echo get_stylesheet_directory_uri().'/images/up.jpg';?>" alt="" title="This is an example of a caption" /></a>
+                <img src="<?php echo get_stylesheet_directory_uri().'/images/walle.jpg';?>" data-thumb="<?php echo get_stylesheet_directory_uri().'/images/walle.jpg';?>" alt="" data-transition="slideInLeft" />
+                <img src="<?php echo get_stylesheet_directory_uri().'/images/nemo.jpg';?>" data-thumb="<?php echo get_stylesheet_directory_uri().'/images/nemo.jpg';?>" alt="" title="#htmlcaption" />
+				
+			</div>
+        </div>
+
+    </div>
+
+
+
 <div class="home-wrap clearfix">
 	<?php
 	// Loop through homepage modules and get their corresponding files

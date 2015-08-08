@@ -4,5 +4,5 @@ jQuery('#slider').nivoSlider({
     animSpeed: 100,                 // Slide transition speed
     pauseTime: 1000,                 // How long each slide will show
     pauseOnHover: true,             // Stop animation while hovering
-  
+	controlNavThumbs: true,         // Use thumbnails for Control Nav
 });

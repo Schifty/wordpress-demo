@@ -47,6 +47,609 @@ add_action('wp_enqueue_scripts', 'wpdemo_load_scripts');
 
 
 
+
+
+
+
+
+/////////////////////////////////////////////////////////////////custom star rating//////////////////////////////////////////////////////////////////////////////////////////////////////
+/*gets the star rating*/
+
+
+//function to cntact the admin when submit is pushed
+function get_stars()
+{
+	//this gets the star rating from the custom field
+	$stars = get_field("stars");
+	
+	// this is the switch statement to save the start rating as a string for out put
+	switch ($stars) {
+    case "0.0":
+        $starRating = '<i class="fa fa-star-o"></i>';
+        break;
+    case "0.5":
+        $starRating = '<i class="fa fa-star-half"></i>';
+        break;
+    case "1.0":
+        $starRating = '<i class="fa fa-star"></i>';
+        break;
+	case "1.5":
+        $starRating = '<i class="fa fa-star"></i><i class="fa fa-star-half"></i>';
+        break;
+	case "2.0":
+        $starRating = '<i class="fa fa-star"></i><i class="fa fa-star"></i>';
+        break;
+	case "2.5":
+        $starRating = '<i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star-half"></i>';
+        break;
+	case "3.0":
+        $starRating = '<i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i>';
+        break;
+	case "3.5":
+        $starRating = '<i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"><i class="fa fa-star-half"></i>';
+        break;
+	case "4.0":
+        $starRating = '<i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i>';
+        break;
+	case "4.5":
+        $starRating = '<i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i>';
+        break;
+	case "5.0":
+        $starRating = '<i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star-half"></i>';
+        break;
+    default:
+        $starRating = '<i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i>';
+	}
+	
+	return $starRating;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+////////////////////////////////////////////////////////////////////////////get the slug function///////////////////////////////////////////////////////////////////////////////////////////////////////////
+/**/
+function get_the_slug( $id=null ){
+
+  if( empty($id) ):
+     global $post;
+
+    if( empty($post) )
+	return ''; // No global $post var available.
+	  $id = $post->ID;
+	endif;
+	
+	$slug = basename( get_permalink($id) );
+  return $slug;
+
+}
+
+
+
+
+
+/////////////////////////////////////////////////////////////////////////current page url function//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/*htis function returns the current page url*/
+
+
+function curPageURL() {
+ $pageURL = 'http';
+ if ($_SERVER["HTTPS"] == "on") {$pageURL .= "s";}
+ $pageURL .= "://";
+ if ($_SERVER["SERVER_PORT"] != "80") {
+  $pageURL .= $_SERVER["SERVER_NAME"].":".$_SERVER["SERVER_PORT"].$_SERVER["REQUEST_URI"];
+ } else {
+  $pageURL .= $_SERVER["SERVER_NAME"].$_SERVER["REQUEST_URI"];
+ }
+ return $pageURL;
+}
+
+
+
+
+
+
+
+
+
+
+
+///////////////////////////////////////////////////////////////////////custom login functions //////////////////////////////////////////////////////////////////////////////////////////
+/*these are the redirect functions to maintain the use of the custom login page and not the wp defautl login page*/
+
+//when the user logs out redirect to the new login page
+function wpdemo_logout_page(){
+
+$new_login_page=get_home_url()."/login/";
+wp_redirect($new_login_page."?login=out");
+exit;
+
+}
+
+add_action('wp_logout','wpdemo_logout_page');
+
+//verify if the username and password are empty
+function wp_demo_verify_username_password($user,$username,$password){
+
+if($username=="" or $password==""){
+$new_login_page=get_home_url()."/login/";
+wp_redirect($new_login_page."?login=empty");
+exit;   
+}
+	 
+}
+
+add_filter('authenticate','wp_demo_verify_username_password',1,3);
+
+
+//if wordpress authentication fails in the database 
+//both username and password must be entered to authenticate
+function wp_demo_login_fail(){
+
+$new_login_page=get_home_url()."/login/";
+wp_redirect($new_login_page."?login=fail");
+exit;
+
+}
+
+add_action('wp_login_failed', 'wp_demo_login_fail');
+
+
+
+function login_redirect(){
+
+//new login page
+$new_login_page=get_home_url()."/login/";
+//old login page basename which is wp-login
+$visiting_page=basename($_SERVER["REQUEST_URI"],".php"); 
+
+//if the user is on the old login page redirect them to the new login page
+//test if the user is on the old login page
+
+if($visiting_page == 'wp-login' and $_SERVER['REQUEST_METHOD'] == 'GET'){
+wp_redirect($new_login_page);
+exit;
+}
+
+}
+
+add_action('init','login_redirect');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////////////////////wpdemo-admin only page /////////////////////////////////////////////////////////////////////////////////////////////////
+/*   Function to protect the member salary page of the blog from those who are not administrators*/
+
+
+
+
+function wpdemo_protect_admin_page(){
+
+	//	check if we are on the member salaries page and Check to see if user is logged in as administrator
+	if (is_page('member-salaries') and (!current_user_can('administrator'))){
+		
+			//location redirect variable
+			$location = get_home_url();
+			
+			// and the redirect if not administrator
+			wp_safe_redirect( $location ); exit;
+			
+	}// ends the if is page 'members' statement
+	
+}// ends the function protect member salery page
+
+add_action('get_header', 'wpdemo_protect_admin_page');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////////////////////wpdemo-protect page /////////////////////////////////////////////////////////////////////////////////////////////////
+/*   Function to protect the member page of the blog from those who are not logged in*/
+
+
+
+
+function wpdemo_protect_member_page(){
+
+//	check if we are on the member page
+if (is_page('members'))
+		// heck to see if there is a logged in member
+		if ( !is_user_logged_in() ) {
+		//saves the login page url as a variabe for redirect
+		$login = wp_login_url( );
+			$status = '302';
+	//the redirect for non logged in users trying to see the protected page		
+	wp_redirect( $login, $status);	exit;
+}// ends the if is page 'members' statement
+}// ends the function protect member page
+
+add_action('get_header', 'wpdemo_protect_member_page');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/////////////////////////////////////////////////////////////////wpdemo_hotel_submit hook//////////////////////////////////////////////////////////////////////////////////////////////////////
+/*//function to contact the admin when submit is pushed
+
+first parameter is the nae of the hook
+second parameter is the nae of the function that will execute(code to be add jsut before the head clse tag)*/
+add_action('wpdemo_hotel_submit','hotel_contact_admin');
+
+//function to cntact the admin when submit is pushed
+function hotel_contact_admin()
+{
+	//function to contact the admin when submit is pushed
+	//echo get_option( 'admin_email', $default); exit;
+	$admin_mail = get_option( 'admin_email', $default); 
+ 
+ wp_mail( $admin_mail, 'New Hotel Form', 'The website has been contacted' );
+	
+}//close the add meta function
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/////////////////////////////////////////////////////////////////wpdemo_add hotel info to database//////////////////////////////////////////////////////////////////////////////////////////////////////
+/*//function to add hotel info when submit is pushed
+
+first parameter is the nae of the hook
+second parameter is the nae of the function that will execute(code to be add jsut before the head clse tag)*/
+add_action('wpdemo_hotel_submit','insert_hotel_info');
+
+//function to insert hotel info to database
+function insert_hotel_info()
+{	
+	//php object variable that represents a connection to the database
+	global $wpdb;
+	
+	// first step is to get the variables
+    
+	$hname = wp_strip_all_tags($_POST['hotel_name']);
+	$address = wp_strip_all_tags($_POST['address']);
+    $stars = wp_strip_all_tags($_POST['stars']);
+    $slide1 = wp_strip_all_tags($_POST['slide1']);
+	
+	
+	// Create post object
+	$hotels_post = array(
+	  'post_title'    => $hname,
+	  'post_status'   => 'publish',
+	  'post_type'     => 'hotels',
+	);
+	
+	
+	//inserted into demowp_posts using wpdb object and its function
+	$wpdb->insert( 	'demowp_posts', $hotels_post );
+	
+	//postid variable gets the post id of the contact post just entered and saves it for the post met information
+	$post_id = $wpdb->insert_id;
+	
+	// clumns and meta value for entering the hotel name
+	$hname_meta = array(
+	  'post_id' => $post_id,
+	  'meta_key'   => 'hname',
+	  'meta_value' => $hname
+	);
+	
+	
+	// this tie the meta info is inserted into the post meta table
+	$wpdb->insert( 	'demowp_postmeta', $hname_meta );
+	
+	// clumns and meta value for entering the address
+	$address_meta = array(
+	  'post_id' => $post_id,
+	  'meta_key'   => 'address',
+	  'meta_value' => $address
+	);
+	
+	
+	// this tie the meta info is inserted into the post meta table
+	$wpdb->insert( 	'demowp_postmeta', $address_meta );
+	
+	// clumns and meta value for entering the stars
+	$stars_meta = array(
+	  'post_id' => $post_id,
+	  'meta_key'   => 'stars',
+	  'meta_value' => $stars
+	);
+	
+	
+	// this tie the meta info is inserted into the post meta table
+	$wpdb->insert( 	'demowp_postmeta', $stars_meta );
+	
+	
+	
+	// clumns and meta value for entering the slide
+	$slide1_meta = array(
+	  'post_id' => $post_id,
+	  'meta_key'   => 'slide1',
+	  'meta_value' => $slide1
+	);
+	
+	// this tie the meta info is inserted into the post meta table
+	$wpdb->insert( 	'demowp_postmeta', $slide1_meta );
+	
+
+
+}//close the add meta function
+
+
+
+
+
+
+
+
+
+
+///////////////////////////////////////////////////request form///////////////////////////////////////////////////////////////////////////////////////////////////////////
+/*
+this function process the information inthe contact form and sends off an email to the administrator
+*/
+function show_hotel_form_error()
+{
+	
+	
+	
+	
+		//set the blank variable
+		$error="";
+   
+        $hname = trim($_POST['hname']);
+		$address = trim($_POST['address']);
+		$stars = trim($_POST['stars']);
+		$description = trim($_POST['description']);
+		$slide1 = trim($_POST['slide1']);
+        
+		
+   
+ 
+		
+       // Check if name has been entered
+        if ($hname!= ""){
+			// sanitize to remove illegal cde entered into the form or illegal characters
+			$hname = filter_var($hname, FILTER_SANITIZE_STRING);
+			//after the first name has been sanitized, make sure it is not blank
+			if($hname == "") {
+				$error .= 'Please enter a valid hotel name<br/><br/>';
+			}
+		}
+			else {
+				$error .= 'Please enter a hotel name,<br/><br/>';
+			}
+				
+		// Check if name has been entered
+        if ($address!= ""){
+			// sanitize to remove illegal cde entered into the form or illegal characters
+			$address = filter_var($address, FILTER_SANITIZE_STRING);
+			//after the first name has been sanitized, make sure it is not blank
+			if($address == "") {
+				$error .= 'Please enter a valid address<br/><br/>';
+			}
+		}
+			else {
+				$error .= 'Please enter an address,<br/><br/>';
+			}
+      
+		// Check if email has been entered
+        if ($stars!= ""){
+			// sanitize to remove illegal cde entered into the form or illegal characters
+			$stars = filter_var($stars, FILTER_SANITIZE_EMAIL);
+			//closes the validate if
+		}else {
+				$error .= 'Please enter a number between 1 and 5,<br/><br/>';
+			}//ends the email if email is blank sttement
+        
+		// Check if email has been entered
+        if ($description!= ""){
+			// sanitize to remove illegal cde entered into the form or illegal characters
+			$description = filter_var($description, FILTER_SANITIZE_EMAIL);
+			//closes the validate if
+		}else {
+				$error .= 'Please enter a descripton<br/><br/>';
+			}//ends the email if email is blank sttement
+		
+		
+		// Check if name has been entered
+        if ($slide1!= ""){
+			// sanitize to remove illegal cde entered into the form or illegal characters
+			$slide1 = filter_var($slide1, FILTER_SANTIZE_STRING);
+		}
+		
+}//ends function
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+///////////////////////////////////////////////////show request form///////////////////////////////////////////////////////////////////////////////////////////////////////////
+/*
+This function brings up the contact form for the client to see, 
+*/
+function show_hotel_form($error="")
+{
+	if($error!=""){
+		echo '<div class="alert alert-danger centered">'.$error.'</div>';
+	}
+	
+	
+	//echo "Submitted"; exit;
+?>
+<!--html form for bootstrap contact form-->	
+<form class="form-horizontal" role="form" method="post" action="<?php echo get_permalink(); ?>" >
+    <div class="form-group">
+        <label for="hname" class="col-sm-2 control-label">Hotel Name</label>
+        <div class="col-sm-10">
+            <input type="text" class="form-control" id="hname" name="hname" placeholder="The Sandman" value="<?php echo htmlspecialchars($_POST['hname']); ?>">
+            
+        </div>
+    </div>
+	
+	<div class="form-group">
+        <label for="address" class="col-sm-2 control-label">Address</label>
+        <div class="col-sm-10">
+            <input type="text" class="form-control" id="address" name="address" placeholder="123  1st street, anywhere USA" value="<?php echo htmlspecialchars($_POST['address']); ?>">
+            
+        </div>
+    </div>
+	
+	<div class="form-group">
+        <label for="stars" class="col-sm-2 control-label">Stars</label>
+        <div class="col-sm-10">
+            <input type="stars" class="form-control" id="stars" name="stars" placeholder="5" value="<?php echo htmlspecialchars($_POST['stars']); ?>">
+           
+        </div>
+    </div>
+	
+	<div class="form-group">
+        <label for="description" class="col-sm-2 control-label">Description</label>
+        <div class="col-sm-10">
+            <input type="description" class="form-control" id="description" name="descritpion" placeholder="" value="<?php echo htmlspecialchars($_POST['description']); ?>">
+           
+        </div>
+    </div>
+	
+	 <div class="form-group">
+        <label for="slide1" class="col-sm-2 control-label">Slide1</label>
+        <div class="col-sm-10">
+            <input type="blob" class="form-control" id="slide1" name="slie"  value="<?php echo htmlspecialchars($_POST['slide1']); ?>">
+            
+        </div>
+    </div>
+	
+	
+    <div class="form-group">
+        <div class="col-sm-10 col-sm-offset-2">
+            <input id="submit" name="Submit" type="submit" value="Send" class="btn btn-primary">
+        </div>
+    </div>
+ 
+</form> 
+<?php
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /////////////////////////////////////////////////////////////////wpdemo_contact_submit hook//////////////////////////////////////////////////////////////////////////////////////////////////////
 /*//function to contact the admin when submit is pushed
 
@@ -64,6 +667,31 @@ function request_contact_admin()
  wp_mail( $admin_mail, 'New Request Form', 'The website has been contacted' );
 	
 }//close the add meta function
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -257,6 +885,15 @@ function insert_request_info()
 	$wpdb->insert( 	'demowp_postmeta', $employer3_meta );
 
 }//close the add meta function
+
+
+
+
+
+
+
+
+
 
 
 
@@ -465,6 +1102,30 @@ function show_request_form_error()
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ///////////////////////////////////////////////////show request form///////////////////////////////////////////////////////////////////////////////////////////////////////////
 /*
 This function brings up the contact form for the client to see, 
@@ -599,6 +1260,29 @@ function show_request_form($error="")
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ///////////////////////////////////////////////////contact form///////////////////////////////////////////////////////////////////////////////////////////////////////////
 /*
 this function process the information inthe contact form and sends off an email to the administrator
@@ -703,6 +1387,27 @@ function show_contact_form_error()
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ///////////////////////////////////////////////////show contact form///////////////////////////////////////////////////////////////////////////////////////////////////////////
 /*
 This function brings up the contact form for the client to see, 
@@ -777,6 +1482,33 @@ function show_contact_form($error="")
 <?php
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /////////////////////////////////////////////////////////////////wp head hook add meta//////////////////////////////////////////////////////////////////////////////////////////////////////
 /* his function adds a meta description t the head
 hook int the page with your own code
@@ -805,6 +1537,25 @@ function add_meta_desc()
 }//close the add meta function
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /////////////////////////////////////////////////////////////////wpdemo_contact_submit hook//////////////////////////////////////////////////////////////////////////////////////////////////////
 /*//function to contact the admin when submit is pushed
 
@@ -822,6 +1573,29 @@ function contact_admin()
  wp_mail( $admin_mail, 'New Contact Request', 'The website has been contacted' );
 	
 }//close the add meta function
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -866,6 +1640,26 @@ function insert_contact_info()
 	add_post_meta($post_id, 'phone', $phone);
 	
 }//close the add meta function
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -966,6 +1760,23 @@ function insert_contact_info2()
 	$wpdb->insert( 	demowp_postmeta, $phone_meta );
 
 }//close the add meta function
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -23,7 +23,7 @@
  *
  *     $out = do_shortcode( $content );
  *
- * @link https://codex.wordpress.org/Shortcode_API
+ * @link http://codex.wordpress.org/Shortcode_API
  *
  * @package WordPress
  * @subpackage Shortcodes
@@ -100,7 +100,7 @@ function add_shortcode($tag, $func) {
  *
  * @uses $shortcode_tags
  *
- * @param string $tag Shortcode tag to remove hook for.
+ * @param string $tag shortcode tag to remove hook for.
  */
 function remove_shortcode($tag) {
 	global $shortcode_tags;
@@ -130,10 +130,9 @@ function remove_all_shortcodes() {
  *
  * @since 3.6.0
  *
- * @global array $shortcode_tags List of shortcode tags and their callback hooks.
- *
- * @param string $tag Shortcode tag to check.
- * @return bool Whether the given shortcode exists.
+ * @global array $shortcode_tags
+ * @param string $tag
+ * @return boolean
  */
 function shortcode_exists( $tag ) {
 	global $shortcode_tags;
@@ -146,10 +145,8 @@ function shortcode_exists( $tag ) {
  * @since 3.6.0
  *
  * @global array $shortcode_tags
- *
- * @param string $content Content to search for shortcodes.
- * @param string $tag     Shortcode tag to check.
- * @return bool Whether the passed content contains the given shortcode.
+ * @param string $tag
+ * @return boolean
  */
 function has_shortcode( $content, $tag ) {
 	if ( false === strpos( $content, '[' ) ) {
@@ -181,9 +178,9 @@ function has_shortcode( $content, $tag ) {
  *
  * @since 2.5.0
  *
- * @global array $shortcode_tags List of shortcode tags and their callback hooks.
+ * @uses $shortcode_tags
  *
- * @param string $content Content to search for shortcodes.
+ * @param string $content Content to search for shortcodes
  * @param bool $ignore_html When true, shortcodes inside HTML elements will be skipped.
  * @return string Content with shortcodes filtered out.
  */
@@ -328,29 +325,10 @@ function do_shortcodes_in_html_tags( $content, $ignore_html ) {
 	$trans = array( '[' => '&#91;', ']' => '&#93;' );
 	
 	$pattern = get_shortcode_regex();
-
-	$comment_regex =
-		  '!'           // Start of comment, after the <.
-		. '(?:'         // Unroll the loop: Consume everything until --> is found.
-		.     '-(?!->)' // Dash not followed by end of comment.
-		.     '[^\-]*+' // Consume non-dashes.
-		. ')*+'         // Loop possessively.
-		. '(?:-->)?';   // End of comment. If not found, match all input.
-
-	$regex =
-		  '/('                   // Capture the entire match.
-		.     '<'                // Find start of element.
-		.     '(?(?=!--)'        // Is this a comment?
-		.         $comment_regex // Find end of comment.
-		.     '|'
-		.         '[^>]*>?'      // Find end of element. If not found, match all input.
-		.     ')'
-		. ')/s';
-
-	$textarr = preg_split( $regex, $content, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY );
+	$textarr = wp_html_split( $content );
 
 	foreach ( $textarr as &$element ) {
-		if ( '<' !== $element[0] ) {
+		if ( '' == $element || '<' !== $element[0] ) {
 			continue;
 		}
 
@@ -365,7 +343,7 @@ function do_shortcodes_in_html_tags( $content, $ignore_html ) {
 			continue;
 		}
 
-		if ( $ignore_html || '<!--' === substr( $element, 0, 4 ) ) {
+		if ( $ignore_html || '<!--' === substr( $element, 0, 4 ) || '<![CDATA[' === substr( $element, 0, 9 ) ) {
 			// Encode all [ and ] chars.
 			$element = strtr( $element, $trans );
 			continue;
@@ -373,6 +351,11 @@ function do_shortcodes_in_html_tags( $content, $ignore_html ) {
 
 		$attributes = wp_kses_attr_parse( $element );
 		if ( false === $attributes ) {
+			// Some plugins are doing things like [name] <[email]>.
+			if ( 1 === preg_match( '%^<\s*\[\[?[^\[\]]+\]%', $element ) ) {
+				$element = preg_replace_callback( "/$pattern/s", 'do_shortcode_tag', $element );
+			}
+
 			// Looks like we found some crazy unfiltered HTML.  Skipping it for sanity.
 			$element = strtr( $element, $trans );
 			continue;
@@ -466,7 +449,7 @@ function shortcode_parse_atts($text) {
 				$atts[strtolower($m[3])] = stripcslashes($m[4]);
 			elseif (!empty($m[5]))
 				$atts[strtolower($m[5])] = stripcslashes($m[6]);
-			elseif (isset($m[7]) && strlen($m[7]))
+			elseif (isset($m[7]) and strlen($m[7]))
 				$atts[] = stripcslashes($m[7]);
 			elseif (isset($m[8]))
 				$atts[] = stripcslashes($m[8]);
@@ -560,3 +543,5 @@ function strip_shortcode_tag( $m ) {
 
 	return $m[1] . $m[6];
 }
+
+add_filter('the_content', 'do_shortcode', 11); // AFTER wpautop()
